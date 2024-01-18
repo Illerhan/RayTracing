@@ -1,5 +1,4 @@
 #pragma once
-#include <smmintrin.h>
 
 #include "Color.h"
 

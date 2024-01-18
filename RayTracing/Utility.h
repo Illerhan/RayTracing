@@ -3,6 +3,7 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <cstdlib>
 
 
 using std::shared_ptr;
@@ -15,4 +16,14 @@ const double pi = 3.14159265897932385;
 inline double DegToRad(double degrees)
 {
 	return degrees * pi / 180.0;
+}
+
+inline double RandomDouble()
+{
+	return rand() / (RAND_MAX + 1.0);
+}
+
+inline double RandomDouble(double min, double max)
+{
+	return min + (max - min) * RandomDouble();
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include <vcruntime_typeinfo.h>
 
 #include "Utility.h"
 
@@ -19,6 +18,11 @@ public:
 	bool Surrounds(double x) const
 	{
 		return min < x && x < max;
+	}
+
+	double Clamp(double x) const
+	{
+		return x < min ? min : x > max ? max : x;
 	}
 
 	static const Interval Empty, Universe;
