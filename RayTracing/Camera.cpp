@@ -7,20 +7,35 @@ void Camera::Initialize()
 	height = static_cast<int>(width / aspectRatio);
 	if (height < 1) height = 1;
 
-	center = Position(0, 0, 0);
-	double focalLength = 1;
-	double viewPortHeight = 2;
+	center = mLookFrom;
+
+	double theta = DegToRad(mVFov);
+	double h = tan(theta / 2);
+	double viewPortHeight = 2 * h * mFocusDistance;
 	double viewPortWidth = viewPortHeight * (static_cast<double>(width) / height);
 
-	Vector3 viewPortX = Vector3(viewPortWidth, 0, 0);
-	Vector3 viewPortY = Vector3(0, -viewPortHeight, 0); //We invert Y
+	// Calculate the u,v,w unit basis vectors for the camera coordinate frame.
+	w = Unit(mLookFrom - mLookHat);
+	u = Unit(Cross(mVUp, w));
+	v = Cross(w, u);
+
+	// Calculate the vectors accros the horizontal and down the vertical viewport edges.
+
+	Vector3 viewPortX = viewPortWidth * u;
+	Vector3 viewPortY = viewPortHeight * -v; //We invert Y
 
 	//Delta Vector between pixels
 	pixelDeltaX = viewPortX / width;
 	pixelDeltaY = viewPortY / height;
 
 	//Position of the top left pixel
-	Vector3 viewportOrgin = center - Vector3(0, 0, focalLength) - viewPortX / 2 - viewPortY / 2;
+	Vector3 viewportUpperLeft = center - (mFocusDistance * w) - viewPortX / 2 - viewPortY / 2;
+	Vector3 viewportOrgin = viewportUpperLeft + 0.5 * (pixelDeltaX + pixelDeltaY);
+
+	//Calculate the camera defocus disk basic vectors.
+	auto defocusRadius = mFocusDistance * tan(DegToRad(mDefocusAngle / 2));
+	defocusDiskX = u * defocusRadius;
+	defocusDiskY = v * defocusRadius;
 
 	originPixelLocation = viewportOrgin + 0.5 * (pixelDeltaX + pixelDeltaY);
 }
@@ -73,12 +88,12 @@ Color Camera::RayColor(const Ray& rRay,int bouncesLeft, const Hittable& rWorld) 
 
 Ray Camera::GetRay(int x, int y) const
 {
-	// Get a randomly sampled camera ray for the pixel location i,j.
+	// Get a randomly sampled camera ray for the pixel location i,j from the camera defocus Disk.
 
 	Vector3 pixelCenter = originPixelLocation + (x * pixelDeltaX) + (y * pixelDeltaY);
 	Vector3 pixelSample = pixelCenter + PixelSampleSquared();
 
-	Position rayOrigin = center;
+	Position rayOrigin = (mDefocusAngle <= 0) ? center : DefocusDiskSample();
 	Vector3 rayDirection = pixelSample - rayOrigin;
 
 	return Ray(rayOrigin, rayDirection);
@@ -90,4 +105,10 @@ Vector3 Camera::PixelSampleSquared() const
 	double pX = -0.5 + RandomDouble();
 	double pY = -0.5 + RandomDouble();
 	return (pX * pixelDeltaX) + (pY * pixelDeltaY);
+}
+
+Position Camera::DefocusDiskSample() const
+{
+	Vector3 p = RandomUnitDisk();
+	return center +(p[0] * defocusDiskX)+(p[1] * defocusDiskY);
 }

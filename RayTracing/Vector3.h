@@ -64,6 +64,7 @@ public:
 
 using Position = Vector3;
 
+
 inline std::ostream& operator <<(std::ostream &rOut, const Vector3& rV)
 {
 	return rOut << rV.x << ' ' << rV.y << ' ' << rV.z << std::endl;
@@ -150,4 +151,21 @@ inline Vector3 RandomOnHemiSphere(const Vector3& normal
 inline Vector3 Reflect(const Vector3& direction, const Vector3& normal)
 {
 	return direction - 2 * Dot(direction, normal) * normal;
+}
+
+inline Vector3 Refract(const Vector3& uv, const Vector3 n, double etaiOverEtat)
+{
+	double cosTheta = fmin(Dot(-uv, n), 1.0);
+	Vector3 rOutPerp = etaiOverEtat * (uv + cosTheta * n);
+	Vector3 rOutparallel = -sqrt(fabs(1.0 - rOutPerp.SquaredLength())) * n;
+	return rOutPerp + rOutparallel;
+}
+
+inline Vector3 RandomUnitDisk()
+{
+	while (true){
+		Vector3 p = Vector3(RandomDouble(-1, 1), RandomDouble(-1, 1), 0);
+		if (p.SquaredLength() < 1)
+			return p;
+	}
 }
