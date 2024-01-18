@@ -8,7 +8,7 @@ private:
 	Position mOrigin;
 	Vector3 mDirection;
 public:
-	Ray();
+	Ray(){}
 	Ray(const Position& from, const Vector3& towards) : mOrigin(from), mDirection(towards){}
 
 	Position GetOrigin() const { return mOrigin; }
