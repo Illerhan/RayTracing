@@ -59,7 +59,7 @@ int main()
     shared_ptr<Material> thirdMat = make_shared<Dielectric>(1.5);
     world.Add(make_shared<Sphere>(Position(4, 1, 0), 1.0, thirdMat));
 
-    Camera camera(1200,16.0 / 9.0, 100,20, 20,
+    Camera camera(500,16.0 / 9.0, 100,10, 20,
         Position(13,2,3),Position(0,0,0), Vector3(0,1,0)
     , 0.6,10);
     camera.Render(world);
